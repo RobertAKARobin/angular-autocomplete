@@ -1,0 +1,47 @@
+<!--
+I didn't want to put app-field inside app-autocomplete, and tried various other approaches, but this ended up being far-and-away the simplest. Fortunately we don't really lose any customization, since app-field is hardly customizable.
+-->
+<app-field>
+    <ng-container appFieldLabel>
+        <ng-content select="[appFieldLabel]"></ng-content>
+    </ng-container>
+
+    <ng-container appFieldControl>
+        <input
+            #input
+            matInput
+            [formControl]="dummyFormControl"
+            [matAutocomplete]="autocomplete"
+            (blur)="textFocus$.next(false)"
+            (focus)="textFocus$.next(true)"
+            (keyup)="textInput$.next(matInput.value)"
+        />
+
+        <mat-autocomplete
+            #autocomplete
+            (closed)="menuFocus$.next(false)"
+            (opened)="menuFocus$.next(true)"
+            (optionSelected)="selectionValue$.next($event.option.value)"
+        >
+            <ng-container *ngIf="filteredOptions$ | async as filteredOptions">
+                <mat-option
+                    *ngIf="filteredOptions.length === 0"
+                    [disabled]="true"
+                >
+                    No matching options
+                </mat-option>
+
+                <mat-option
+                    *ngFor="let option of filteredOptions"
+                    [value]="option.value"
+                >
+                    {{ option.label }}
+                </mat-option>
+            </ng-container>
+        </mat-autocomplete>
+    </ng-container>
+
+    <ng-container appFieldHint>
+        <ng-content select="[appFieldHint]"></ng-content>
+    </ng-container>
+</app-field>
